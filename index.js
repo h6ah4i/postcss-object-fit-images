@@ -1,77 +1,70 @@
-'use strict';
+'use strict'
 
-var postcss = require('postcss');
-var parseCssFont = require('parse-css-font');
-var quote = require('quote');
+const postcss = require('postcss')
+const parseCssFont = require('parse-css-font')
+const quote = require('quote')
 
-var quoteIfNecessary = function (family) {
+const quoteIfNecessary = function (family) {
     if (/[^^]\s[^$]/.test(family)) {
-        return quote(family);
+        return quote(family)
     }
-    return family;
-};
+    return family
+}
 
-var getLastPropertyDecl = function (parent, name) {
+const getLastPropertyDecl = function (parent, name) {
+    let decl = null
 
-    var decl;
+    parent.walkDecls(name, currentDecl => {
+        decl = currentDecl
+    })
 
-    parent.walkDecls(name, function (currentDecl) {
-        decl = currentDecl;
-    });
+    return decl
+}
 
-    return decl;
-};
+const declWalker = function (decl) {
+    let parent = decl.parent
 
-var declWalker = function (decl) {
+    let objFit = decl.value
 
-    var parent = decl.parent;
+    let existingFont = getLastPropertyDecl(parent, /^font(-family)?$/)
+    let objPosition = getLastPropertyDecl(parent, 'object-position')
 
-    var objFit = decl.value;
-
-    var existingFont = getLastPropertyDecl(parent, /^font(-family)?$/);
-    var objPosition = getLastPropertyDecl(parent, 'object-position');
-
-    var value = [
-        'object-fit:' + objFit
-    ];
+    let value = ['object-fit:' + objFit]
     if (objPosition) {
-        value.push('object-position:' + objPosition.value);
+        value.push('object-position:' + objPosition.value)
     }
 
-    var props = {
+    let props = {
         prop: 'font-family',
         value: quote(value.join(';'))
-    };
+    }
 
     // keep existing font-family
-    var fontFamily;
+    let fontFamily = null
     if (existingFont) {
         if (existingFont.prop === 'font') {
-            fontFamily = parseCssFont(existingFont.value).family;
-            fontFamily = fontFamily.map(quoteIfNecessary).join(', ');
+            fontFamily = parseCssFont(existingFont.value).family
+            fontFamily = fontFamily.map(quoteIfNecessary).join(', ')
         } else {
-            fontFamily = existingFont.value;
+            fontFamily = existingFont.value
         }
     }
     if (fontFamily) {
-        props.value += ', ' + fontFamily;
+        props.value += ', ' + fontFamily
 
         if (existingFont.prop === 'font') {
-            existingFont.cloneAfter(props);
+            existingFont.cloneAfter(props)
         } else {
-            existingFont.replaceWith(props);
+            existingFont.replaceWith(props)
         }
     } else {
-        decl.cloneBefore(props);
+        decl.cloneBefore(props)
     }
+}
 
-};
-
-module.exports = postcss.plugin('postcss-object-fit-images', function (opts) {
-
-    opts = opts || {};
-
+// eslint-disable-next-line no-unused-vars
+module.exports = postcss.plugin('postcss-object-fit-images', opts => {
     return function (css) {
-        css.walkDecls('object-fit', declWalker);
-    };
-});
+        css.walkDecls('object-fit', declWalker)
+    }
+})
