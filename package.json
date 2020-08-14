@@ -25,7 +25,7 @@
   "homepage": "https://github.com/ronik-design/postcss-object-fit-images",
   "dependencies": {
     "parse-css-font": "^2.0.2",
-    "postcss": "^5.0.16",
+    "postcss": "^7.0.32",
     "quote": "^0.4.0"
   },
   "devDependencies": {
