@@ -29,7 +29,8 @@
     "quote": "^0.4.0"
   },
   "devDependencies": {
-    "ava": "^0.14.0",
+    "@ava/babel": "^1.0.1",
+    "ava": "^3.11.1",
     "eslint": "^2.1.0",
     "eslint-config-postcss": "^2.0.0"
   },
@@ -38,5 +39,8 @@
   },
   "eslintConfig": {
     "extends": "eslint-config-postcss/es5"
+  },
+  "ava": {
+    "babel": true
   }
 }
